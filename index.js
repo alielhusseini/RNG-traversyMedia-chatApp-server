@@ -1,5 +1,7 @@
 // imports
 const { GraphQLServer } = require('graphql-yoga')
+const express = require('express')
+const cors = require('cors')
 
 // schemas
 const messages = [] // we won't work with a db
@@ -38,6 +40,8 @@ resolvers = {
 }
 
 // setup
+const app = express()
+app.use(cors())
 const server = new GraphQLServer({ typeDefs, resolvers })
 
 server.start(({ port }) => {
