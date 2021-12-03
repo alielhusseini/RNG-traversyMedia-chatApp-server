@@ -6,7 +6,8 @@ const cors = require('cors')
 // schemas
 const messages = [] // we won't work with a db
 const subscribers = [];
-const onMessagesUpdates = (fn) => subscribers.push(fn);
+const MSG_SUB = 'MSG_SUB'
+// const onMessagesUpdates = (fn) => subscribers.push(fn);
 
 typeDefs = `
     # schemas
@@ -34,20 +35,22 @@ resolvers = {
         messages: () => messages
     },
     Mutation: {
-        postMessage: (parent, { user, content }) => {
+        postMessage: (parent, { user, content }, { pubsub }) => {
             const id = messages.length;
             messages.push({ id, user, content});
-            subscribers.forEach((fn) => fn());
+            // subscribers.forEach((fn) => fn());
+            pubsub.publish('MSG_SUB', { sentMessage: messages[id] })
             return id;
         }
     },
     Subscription: {
         messages: {
             subscribe: (parent, args, { pubsub }) => {
-                const channel = Math.random().toString(36).slice(2, 15);
-                onMessagesUpdates(() => pubsub.publish(channel, { messages }));
-                setTimeout(() => pubsub.publish(channel, { messages }), 0);
-                return pubsub.asyncIterator(channel);
+                // const channel = Math.random().toString(36).slice(2, 15);
+                // onMessagesUpdates(() => pubsub.publish(channel, { messages }));
+                // setTimeout(() => pubsub.publish(channel, { messages }), 0);
+                // return pubsub.asyncIterator(channel);
+                return pubsub.asyncIterator(MSG_SUB)
             }
         }
     }
